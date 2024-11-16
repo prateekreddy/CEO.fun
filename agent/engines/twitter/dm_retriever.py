@@ -62,7 +62,9 @@ class DMRetreiver:
         """Store the processed messages in DB"""
         try:
             db.add_all(messages)
+            db.commit()
         except Exception as e:
+            db.rollback()
             print(f"Error storing messages: {e}")
 
     def retrieve_messages_by_users(self, db: Session, user_ids: List) -> Dict:

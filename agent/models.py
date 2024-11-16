@@ -14,6 +14,7 @@ class User(Base):
     email = Column(String, index=True, default="tee_hee_he@example.com")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    teleport = Column(Boolean, default=False)
 
     posts = relationship("Post", back_populates="user")
     comments = relationship("Comment", back_populates="user")

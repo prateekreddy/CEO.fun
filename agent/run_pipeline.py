@@ -17,6 +17,7 @@ from pipeline import PostingPipeline, Config
 from config import Config, ConfigMaker
 from db.db_setup import create_database, get_db
 from engines.wallet.wallet_send import WalletManager
+from engines.wallet.find_teleport import TeleportManager
 
 class PipelineRunner:
     def __init__(self):
@@ -26,6 +27,7 @@ class PipelineRunner:
         self.make_new_wallet = False
         self.wallet_manager = WalletManager()
         self.config = self.create_config()
+        self.teleport_manager = TeleportManager(os.getenv("TELEPORT_CONTRACT_ADDRESS"), self.config.eth_mainnet_rpc_url)
         self.post_sender = PostSender()
         self.pipeline = PostingPipeline(self.config)
         self.behavior_simulator = HumanBehaviorSimulator()  # Initialize the simulator
@@ -71,6 +73,8 @@ class PipelineRunner:
         print(f"\nPipeline activated at: {datetime.now().strftime('%H:%M:%S')}")
         next_run = self.get_next_run_time()
 
+        lastBlock = self.teleport_manager.get_last_block()
+
         while datetime.now() < deactivation_time:
             if datetime.now() >= next_run:
                 if self.behavior_simulator.should_post():
@@ -88,7 +92,9 @@ class PipelineRunner:
                     f"({(next_run - datetime.now()).total_seconds():.1f} seconds from now)"
                 )
 
-            time.sleep(1)
+            # Poll for events
+            lastBlock = self.teleport_manager.query_events(self.config.db, lastBlock, os.getenv("AGENT_WALLET_ADDRESS"))
+            time.sleep(5)
 
         print(f"Pipeline deactivated at: {datetime.now().strftime('%H:%M:%S')}")
 
@@ -96,7 +102,7 @@ class PipelineRunner:
         """Main execution loop."""
         print("\nPerforming initial pipeline run...")
         try:
-            self.pipeline.run()
+            # self.pipeline.run()
             print("Initial run completed successfully.")
         except Exception as e:
             print(f"Error during initial run: {e}")
