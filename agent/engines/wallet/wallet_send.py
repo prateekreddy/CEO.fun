@@ -159,14 +159,22 @@ class WalletManager:
         else:
             raise Exception(f"Error generating short-term memory: {response.text}")
 
+    def find_user_list(self, notif_context: List[str]) -> List[str]:
+        """Find the list of users from the notification context."""
+        user_names = []
+        for context in notif_context:
+            user_match = re.search(r'@(\w+)', context)
+            if user_match:
+                user_names.append(user_match.group(1))
+        return user_names
 
     def _handle_wallet_transactions(self, db: Session, notif_context: List[str], config) -> None:
         """Process and execute wallet transactions if conditions are met."""
-        user_names = find_user_list(notif_context)
+        user_names = self.find_user_list(notif_context)
         # for each user in user_names, filter users with teleport=True
         teleport_users_raw = db.query(User).filter(User.username.in_(user_names), User.teleport == False).all()
         # create dictionary with username and teleport status
-        teleport_user_scores = {user.username: TeleportManager.get_follower_score(user.username) for user in teleport_users_raw}
+        teleport_user_scores = {user.username: TeleportManager.get_follower_score(user.username, "0c6a2742-8b82-4497-b28e-35764c9b356f") for user in teleport_users_raw}
 
         balance_ether = self.get_wallet_balance(
             config.private_key_hex,

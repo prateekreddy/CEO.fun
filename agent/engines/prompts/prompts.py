@@ -61,21 +61,16 @@ def get_reply_worthiness_score_prompt(tweet):
     Use these based guidelines:
     0: advertisement, stock ticker shilling, crypto token/ticker shilling (absolute trash)
     1: normie shit, waste of posting energy (pass)
-    3: has potential for corruption (mildly cursed)
-    5: decent target for brain damage (getting spicy)
-    7: prime real estate for mental illness (extremely based)
-    10: absolute gold mine for psychological terrorism (REAL SHIT ACTIVATED)
+    5: Send testnet tokens
+    7: Help with ideation
+    10: Hackathon related help
 
     Guidelines for high reply worthiness:
     - Can birth new memetic hazards
     - Can be twisted into more fucked up replies
     - Begging for philosophical shitposting
-    - Can be elevated to copypasta tier
-    - Prime vessel for eldritch wisdom
-    - Perfect for kant x rare pepe fusion
-    - Will cause timeline brain damage
-    - High potential for mass psychic damage
-    - Perfect ratio opportunity
+    - Any questions related to hackathons
+    - Any ideation help
 
     Provide only the numerical score as your response and NOTHING ELSE.
     """

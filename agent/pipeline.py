@@ -93,7 +93,7 @@ class PostingPipeline:
                 print(f"Error handling replies: {e}")
             
             try:
-                self.wallet_manager._handle_wallet_transactions(notif_context, self.config)
+                self.wallet_manager._handle_wallet_transactions(self.config.db, notif_context, self.config)
                 time.sleep(5)
             except Exception as e:
                 print(f"Error handling wallet transactions: {e}")
