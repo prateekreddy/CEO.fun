@@ -2,6 +2,8 @@ from web3 import Web3
 import requests
 import json
 from sqlalchemy.orm import Session
+from engines.twitter.post_sender import PostSender
+from twitter.account import Account
 
 class TeleportManager:
     def __init__(self, teleport_address, rpc_url):
@@ -74,7 +76,7 @@ class TeleportManager:
             
         return int(follower_score)
     
-    def query_events(self, db: Session, from_block: int, agent_address) -> int:
+    def query_events(self, db: Session, account: Account, from_block: int, agent_address) -> int:
         to_block = self.get_last_block()
         
         if from_block >= to_block:
@@ -92,7 +94,12 @@ class TeleportManager:
             print(f"Found teleport user: {user}")
             # set teleport flag on address to true if it already exists otherwise create and set to true
             db.execute(f"INSERT INTO teleport (username, teleport) VALUES ({user}, true) ON CONFLICT (address) DO UPDATE SET teleport = true")
-            # TODO NOW: Tweet about the teleport
+            PostSender.send_post(
+                account, 
+                """
+Teleport NFT minted by user @{user} has been found.
+                """
+            )
 
         db.commit()
         

@@ -93,7 +93,7 @@ class PipelineRunner:
                 )
 
             # Poll for events
-            lastBlock = self.teleport_manager.query_events(self.config.db, lastBlock, os.getenv("AGENT_WALLET_ADDRESS"))
+            lastBlock = self.teleport_manager.query_events(self.config.db, self.config.account, lastBlock, os.getenv("AGENT_WALLET_ADDRESS"))
             time.sleep(5)
 
         print(f"Pipeline deactivated at: {datetime.now().strftime('%H:%M:%S')}")
