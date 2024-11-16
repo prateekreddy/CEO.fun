@@ -10,6 +10,9 @@ from eth_keys import keys
 import secrets
 import hashlib
 from engines.prompts.prompts import get_wallet_decision_prompt
+from sqlalchemy.orm import Session
+from models import User
+from engines.wallet.find_teleport import TeleportManager
 
 class WalletManager:
     def __init__(self):
@@ -99,7 +102,7 @@ class WalletManager:
         except Exception as e:
             return f"An error occurred: {e}"
 
-    def wallet_address_in_post(self, posts, messages_by_user, private_key, eth_mainnet_rpc_url: str,llm_api_key: str):
+    def wallet_address_in_post(self, posts, teleport_users_string, private_key, eth_mainnet_rpc_url: str,llm_api_key: str):
         """
         Detects wallet addresses or ENS domains from a list of posts.
         Converts all items to strings first, then checks for matches.
@@ -123,7 +126,7 @@ class WalletManager:
             matches.extend(found_matches)
 
         wallet_balance = self.get_wallet_balance(private_key, eth_mainnet_rpc_url)
-        prompt = get_wallet_decision_prompt(posts, messages_by_user, matches, wallet_balance)
+        prompt = get_wallet_decision_prompt(posts, teleport_users_string, matches, wallet_balance)
 
         response = requests.post(
             url="https://api.hyperbolic.xyz/v1/chat/completions",
@@ -157,8 +160,14 @@ class WalletManager:
             raise Exception(f"Error generating short-term memory: {response.text}")
 
 
-    def _handle_wallet_transactions(self, notif_context: List[str], messages: List, config) -> None:
+    def _handle_wallet_transactions(self, db: Session, notif_context: List[str], config) -> None:
         """Process and execute wallet transactions if conditions are met."""
+        user_names = find_user_list(notif_context)
+        # for each user in user_names, filter users with teleport=True
+        teleport_users_raw = db.query(User).filter(User.username.in_(user_names), User.teleport == False).all()
+        # create dictionary with username and teleport status
+        teleport_user_scores = {user.username: TeleportManager.get_follower_score(user.username) for user in teleport_users_raw}
+
         balance_ether = self.get_wallet_balance(
             config.private_key_hex,
             config.eth_mainnet_rpc_url
@@ -170,7 +179,7 @@ class WalletManager:
             try:
                 wallet_data = self.wallet_address_in_post(
                     notif_context,
-                    messages,
+                    json.dumps(teleport_user_scores),
                     config.private_key_hex,
                     config.eth_mainnet_rpc_url,
                     config.llm_api_key

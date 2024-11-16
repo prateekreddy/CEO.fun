@@ -81,12 +81,15 @@ def get_reply_worthiness_score_prompt(tweet):
     """
     return template.format(tweet=tweet)
 
-def get_wallet_decision_prompt(posts, messages_by_user, matches, wallet_balance):
+def get_wallet_decision_prompt(posts, teleport_users, matches, wallet_balance):
     template = """
     Analyze the following recent posts and external context:
 
     Recent posts:
     {posts}
+
+    Preferred Users Priority Scores:
+    {teleport_users}
 
     Wallet addresses and ENS domains:
     {matches}
@@ -95,6 +98,7 @@ def get_wallet_decision_prompt(posts, messages_by_user, matches, wallet_balance)
     {wallet_balance} ETH
 
     Based on this information, decide if you want to send ETH to any of the addresses or ENS domains, and if so, how much ETH to send to each one.
+    Preferred users get additional ETH based on their Priority scores. Higher the Priority score, higher the additional ETH.
     Remember that this is real ETH from your own resources, so choose wisely.
     You should carefully evaluate the financial decision for your own future and survival.
     The total amount of transfers should never exceed your wallet balance.
@@ -118,7 +122,8 @@ def get_wallet_decision_prompt(posts, messages_by_user, matches, wallet_balance)
     return template.format(
         posts=posts,
         matches=matches,
-        wallet_balance=wallet_balance
+        wallet_balance=wallet_balance,
+        teleport_users=teleport_users
     )
 
 def get_tweet_prompt(external_context, short_term_memory, long_term_memories, recent_posts, query):

@@ -91,7 +91,8 @@ class TeleportManager:
             user = self.find_teleport_user(teleport_id)
             print(f"Found teleport user: {user}")
             # set teleport flag on address to true if it already exists otherwise create and set to true
-            db.execute(f"INSERT INTO teleport (address, teleport) VALUES ({user}, true) ON CONFLICT (address) DO UPDATE SET teleport = true")
+            db.execute(f"INSERT INTO teleport (username, teleport) VALUES ({user}, true) ON CONFLICT (address) DO UPDATE SET teleport = true")
+            # TODO NOW: Tweet about the teleport
 
         db.commit()
         

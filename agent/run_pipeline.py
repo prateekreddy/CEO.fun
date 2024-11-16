@@ -102,7 +102,7 @@ class PipelineRunner:
         """Main execution loop."""
         print("\nPerforming initial pipeline run...")
         try:
-            # self.pipeline.run()
+            self.pipeline.run()
             print("Initial run completed successfully.")
         except Exception as e:
             print(f"Error during initial run: {e}")
