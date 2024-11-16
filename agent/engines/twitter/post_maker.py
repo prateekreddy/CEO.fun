@@ -41,6 +41,9 @@ class PostMaker:
 
         prompt = get_tweet_prompt(external_context, short_term_memory, long_term_memories, recent_posts, query)
 
+        if not prompt:
+            return ""
+
         print(f"Generating post with prompt: {prompt}")
 
         #BASE MODEL TWEET GENERATION

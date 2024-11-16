@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 @dataclass
 class NotificationQueue:
     """Queue to store filtered notifications and timeline posts."""
-    min_queue_size: int = 10
+    min_queue_size: int = 1
     items: deque = field(default_factory=lambda: deque(maxlen=100))  # Store up to 50 items
     processed_ids: set = field(default_factory=set)
     

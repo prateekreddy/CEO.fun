@@ -55,14 +55,16 @@ class ReplyManager:
             if self._should_reply(content, user_id) == False:
                 continue
             try:
+                print(f"Replying")
                 reply_content = self.post_maker.generate_post(
                     short_term_memory="",
                     long_term_memories=[],
                     recent_posts=[],
                     external_context=content,
                     llm_api_key=self.config.llm_api_key,
-                    query="what are you thinking of replying now\n<tweet>"
+                    query=""
                 )
+                print(f"Generated reply: {reply_content}")
                 response = self.config.account.reply(reply_content, tweet_id=tweet_id)
                 # Verify the post was successful
                 if self.post_sender.verify_post_success(response):

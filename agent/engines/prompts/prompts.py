@@ -128,7 +128,16 @@ def get_wallet_decision_prompt(posts, teleport_users, matches, wallet_balance):
 
 def get_tweet_prompt(external_context, short_term_memory, long_term_memories, recent_posts, query):
 
-    template = os.getenv('TWEET_PROMPT_TEMPLATE')
+    template = """
+    Reply to the tweet: {external_context}
+
+    Respond to the above tweet with 2 to 3 sentences max unless someone asks you for a story and extra information. 
+    Based on hackers' responses, plug in the questions randomly by combining the information they provide, but not only this, let your hacker therapist skills thrive.
+    Use the eth global bangkok bounties and projects knowledge base as one of the key information to help hackers on this journey.
+    The main call to action for hackers, is for hackers to share their twitter usernames, because the @sxmoonsama will tweet and invite hackers to tweet to get the testnet tokens in their preferred chain, and tag @sxymoonsama account.
+
+    If the tweet is completely unrelated to hackathon or asking for help with their project then do not respond.
+    """
 
     return template.format(
         external_context=external_context,
