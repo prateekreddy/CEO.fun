@@ -12,7 +12,7 @@ from models import Post, User, TweetPost
 from twitter.account import Account
 
 from engines.twitter.post_retriever import PostRetriever
-from engines.twitter.dm_retriever import DMRetriever
+from engines.twitter.dm_retriever import DMRetreiver
 from engines.memory.short_term_mem import ShortTermMemoryManager
 from engines.memory.long_term_mem import LongTermMemoryManager, LongTermMemory
 from engines.twitter.post_maker import PostMaker
@@ -22,6 +22,7 @@ from engines.wallet.wallet_send import WalletManager
 from engines.twitter.follow_user import FollowManager
 from engines.twitter.reply_manager import ReplyManager
 from engines.twitter.create_user import UserManager
+from engines.twitter.utils import extract_usernames_from_notif_context
 from notification_queue import NotificationQueue
 from config import Config
 
@@ -29,7 +30,7 @@ class PostingPipeline:
     def __init__(self, config: Config):
         self.config = config
         self.post_retriever = PostRetriever()
-        self.dm_retriever = DMRetriever()
+        self.dm_retriever = DMRetreiver()
         self.short_term_mem = ShortTermMemoryManager()
         self.long_term_mem = LongTermMemoryManager()
         self.post_maker = PostMaker()
@@ -67,23 +68,25 @@ class PostingPipeline:
         if not self.notification_queue.is_ready():
             print(f"Queue not ready. Current size: {len(self.notification_queue)}")
             return
-        
+
         # Process Direct Messages
         messages = self.dm_retriever.fetch_latest_dms(self.config.db, self.config.account)
 
         # Store Direct Messages
         self.dm_retriever.store_processed_messages(self.config.db, messages)
-
+        print(f"Stored messages")
         # Store processed tweet IDs
-        self.post_sender.store_processed_tweets(self.config.db, notif_context_tuple)
+        # self.post_sender.store_processed_tweets(self.config.db, notif_context_tuple)
         
         # Let agent go through tweets now
         filtered_notifs_from_queue, notif_context = self.notification_queue.process_queue()
 
-        user_ids = self.twitter_utils.extract_usernames_from_notif_context(notif_context)
-        messages = self.dm_retriever.retrieve_messages_by_users(self.config.db, user_ids)
+        # user_ids = extract_usernames_from_notif_context(self.config.account, notif_context)
+
+        # messages = self.dm_retriever.retrieve_messages_by_users(self.config.db, user_ids)
 
         if notif_context:
+            # TODO: Temporarily disabled
             # try:
             #     self.reply_manager._handle_replies(filtered_notifs_from_queue)
             #     time.sleep(5)
@@ -91,7 +94,7 @@ class PostingPipeline:
             #     print(f"Error handling replies: {e}")
             
             try:
-                self.wallet_manager._handle_wallet_transactions(notif_context, messages, self.config)
+                self.wallet_manager._handle_wallet_transactions(notif_context, self.config)
                 time.sleep(5)
             except Exception as e:
                 print(f"Error handling wallet transactions: {e}")

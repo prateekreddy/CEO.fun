@@ -1,8 +1,14 @@
+import os
 from typing import List, Dict
 from twitter.account import Account
 from sqlalchemy.orm import Session
 from models import Message
 import requests
+from engines.twitter.utils import user_id_by_usernames
+from dotenv import load_dotenv
+from datetime import datetime
+
+load_dotenv()
 
 class DMRetreiver:
     def __init__(self):
@@ -22,39 +28,51 @@ class DMRetreiver:
         inbox = account.dm_inbox()
 
         messages = []
-        if inbox['entries']:
-            messages = self.parse_dm_data(inbox['entries'], from_ms)
-        
+        if inbox['inbox_initial_state'] and inbox['inbox_initial_state']['entries']:
+            messages = self.parse_dm_data(inbox['inbox_initial_state']['entries'], from_ms, user_id_by_usernames(account, [os.getenv("X_USERNAME")]))
         return messages
 
-    def parse_dm_data(self, inbox_entries, from_ms: int): 
+    def parse_dm_data(self, inbox_entries, from_ms: int, account_id):
         # TODO: Implement pagination, can't find any info on how to do this in the Twitter API repo
         """Parse DM data"""
         messages = []
+        print (inbox_entries, account_id)
 
         for dm in inbox_entries:
-            if 'message' in dm and 'message_data' in dm['message'] and 'time' in dm['message']['message_data'] and dm['message']['message_data']['time'] > from_ms:
+            if 'message' in dm and 'message_data' in dm['message'] and 'time' in dm['message']['message_data'] and int(dm['message']['message_data']['time']) > from_ms:
+                user = dm['message']['message_data']['sender_id']
+                if user == account_id:
+                    user = dm['message']['message_data']['recipient_id']
                 msg = dm['message']
                 msg_data = msg['message_data']
                 message = Message(
                     id=msg_data['id'],
                     conversation_id=msg['conversation_id'],
-                    sender_id=msg_data['sender_id'],
-                    recipient_id=msg_data['recipient_id'],
+                    user_id=user,
                     text=msg_data['text'],
-                    created_at=msg_data['time']
+                    # python datetime is in seconds, twitter is in ms
+                    created_at=datetime.fromtimestamp(
+                        int(msg_data['time']) / 1000
+                    ).strftime('%Y-%m-%d %H:%M:%S')
                 )
                 messages.append(message)
         return messages
 
+    def store_processed_messages(self, db: Session, messages: List[Dict]):
+        """Store the processed messages in DB"""
+        try:
+            db.add_all(messages)
+        except Exception as e:
+            print(f"Error storing messages: {e}")
+
     def retrieve_messages_by_users(self, db: Session, user_ids: List) -> Dict:
         """Retrieve DM messages for the users from DB"""
-        messages = db.query(Message).filter(Message.sender_id.in_(user_ids)).all()
+        messages = db.query(Message).filter(Message.user_id.in_(user_ids)).all()
         return {user_id: [self.message_to_dict(message) for message in messages] for user_id in user_ids}
 
     def retrieve_messages_by_user(self, db: Session, user_id: int) -> List[Dict]:
         """Retrieve DM messages for the user from DB"""
-        messages = db.query(Message).filter(Message.sender_id == user_id).all()
+        messages = db.query(Message).filter(Message.user_id == user_id).all()
         return [self.message_to_dict(message) for message in messages]
     
     def message_to_dict(self, message: Message) -> Dict:
@@ -62,8 +80,7 @@ class DMRetreiver:
         return {
             "id": message.id,
             "conversation_id": message.conversation_id,
-            "sender_id": message.sender_id,
-            "recipient_id": message.recipient_id,
+            "user_id": message.user_id,
             "text": message.text,
             "created_at": message.created_at
         }

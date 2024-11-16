@@ -1,8 +1,12 @@
+import os
 import json
 from datetime import datetime
 from typing import Dict, Any
 import re
 from twitter.scraper import Scraper
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def parse_twitter_data(data: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -160,13 +164,15 @@ def is_spam(self, content: str) -> bool:
         ]
     return any(re.search(p, clean) for p in patterns)
 
-def user_id_by_usernames(self, account, usernames) -> list:
+def user_id_by_usernames(account, usernames:list) -> list:
     """Get the ID of a user by their username"""
-    scraper = Scraper(account.session.cookies)
+    # TODO: get access tokens from account input var instead
+    auth_tokens = json.loads(os.getenv("X_AUTH_TOKENS"))
+    scraper = Scraper(cookies=auth_tokens)
     users = scraper.users(usernames)
-    return [user['id'] for user in users]
+    return [user['data']['user']['result']['rest_id'] for user in users]
 
-def extract_usernames_from_notif_context(self, account, notif_context):
+def extract_usernames_from_notif_context(account, notif_context):
     # Convert everything to strings first
     str_notifs = [str(notif) for notif in notif_context]
 
@@ -180,4 +186,4 @@ def extract_usernames_from_notif_context(self, account, notif_context):
 
     # Remove duplicates
     twitter_usernames = list(set(twitter_usernames))
-    return self.user_id_by_usernames(account, twitter_usernames)
+    return user_id_by_usernames(account, twitter_usernames)

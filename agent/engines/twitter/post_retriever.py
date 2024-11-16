@@ -148,6 +148,8 @@ class PostRetriever:
                 try:
                     user_info = tweet_info['core']['user_results']['result']['legacy']
                     tweet_details = tweet_info['legacy']
+                    # print user info
+                    print(f"User: {user_info}")
 
                     readable_format = {
                         "Tweet ID": tweet_id or tweet_details.get('id_str'),
@@ -320,6 +322,7 @@ class PostRetriever:
 
                         # Extract user data
                         user_data = result.get('core', {}).get('user_results', {}).get('result', {}).get('legacy', {})
+                        print(result)
                         if not user_data:
                             continue
 

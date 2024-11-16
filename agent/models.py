@@ -17,6 +17,7 @@ class User(Base):
 
     posts = relationship("Post", back_populates="user")
     comments = relationship("Comment", back_populates="user")
+    messages = relationship("Message", back_populates="user")
     likes = relationship("Like", back_populates="user")
 
 class Post(Base):
@@ -52,6 +53,18 @@ class Comment(Base):
     user = relationship("User", back_populates="comments")
     post = relationship("Post", back_populates="comments")
     likes = relationship("Like", back_populates="comment")
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    conversation_id = Column(String, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    text = Column(Text)
+
+    user = relationship("User", back_populates="messages")
+
 
 class Like(Base):
     __tablename__ = "likes"
