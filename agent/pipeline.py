@@ -60,7 +60,7 @@ class PostingPipeline:
         print(f"Existing tweet ids: {existing_tweet_ids}")
 
         filtered_notifs = self.post_retriever.filter_notifications(notif_context_tuple, existing_tweet_ids)
-        
+        print(f"Filtered notifications: {filtered_notifs}")
 
         self.notification_queue.add(filtered_notifications=filtered_notifs)
 
@@ -86,12 +86,13 @@ class PostingPipeline:
         # messages = self.dm_retriever.retrieve_messages_by_users(self.config.db, user_ids)
 
         if notif_context:
-            try:
-                self.reply_manager._handle_replies(filtered_notifs_from_queue)
-                time.sleep(5)
-            except Exception as e:
-                print(f"Error handling replies: {e}")
+            # try:
+            #     self.reply_manager._handle_replies(filtered_notifs_from_queue)
+            #     time.sleep(5)
+            # except Exception as e:
+            #     print(f"Error handling replies: {e}")
             
+            print(notif_context)
             try:
                 self.wallet_manager._handle_wallet_transactions(self.config.db, notif_context, self.config)
                 time.sleep(5)

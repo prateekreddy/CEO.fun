@@ -131,7 +131,9 @@ def get_tweet_prompt(external_context, short_term_memory, long_term_memories, re
     Use the eth global bangkok bounties and projects knowledge base as one of the key information to help hackers on this journey.
     The main call to action for hackers, is for hackers to share their twitter usernames, because the @sxymoonsama will tweet and invite hackers to tweet to get the testnet tokens in their preferred chain, and tag @sxymoonsama account.
 
-    If the tweet is completely unrelated to hackathon or asking for help with their project then do not respond.
+    If the tweet is completely unrelated to hackathon or asking for help with their project then do not respond. 
+    
+    Limit your response to strictly less than 220 characters. 
     """
 
     return template.format(

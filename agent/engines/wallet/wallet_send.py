@@ -44,29 +44,31 @@ class WalletManager:
         """
         try:
             w3 = Web3(Web3.HTTPProvider(eth_mainnet_rpc_url))
-
+            print("starting tx")
             # Check if connected to blockchain
             if not w3.is_connected():
                 print("Failed to connect to ETH Mainnet")
                 return "Connection failed"
 
             # Set up ENS
-            w3.ens = ENS.fromWeb3(w3)
+            # w3.ens = ENS.fromWeb3(w3)
 
-            # Resolve ENS name to Ethereum address if necessary
-            if Web3.is_address(to_address):
-                # The to_address is a valid Ethereum address
-                resolved_address = Web3.to_checksum_address(to_address)
-            else:
-                # Try to resolve as ENS name
-                resolved_address = w3.ens.address(to_address)
-                if resolved_address is None:
-                    return f"Could not resolve ENS name: {to_address}"
+            print("about to resolve")
+            # # Resolve ENS name to Ethereum address if necessary
+            # if Web3.is_address(to_address):
+            #     # The to_address is a valid Ethereum address
+            #     resolved_address = Web3.to_checksum_address(to_address)
+            #     print(resolved_address)
+            # else:
+            #     # Try to resolve as ENS name
+            #     resolved_address = w3.ens.address(to_address)
+            #     if resolved_address is None:
+            #         return f"Could not resolve ENS name: {to_address}"
 
-            print(f"Transferring to {resolved_address}")
+            print(f"Transferring to {to_address}")
 
             # Convert the amount in Ether to Wei
-            amount_in_wei = w3.toWei(amount_in_ether, 'ether')
+            amount_in_wei = w3.to_wei(amount_in_ether, 'ether')
 
             # Get the public address from the private key
             account = w3.eth.account.from_key(private_key)
@@ -77,19 +79,19 @@ class WalletManager:
 
             # Build the transaction
             transaction = {
-                'to': resolved_address,
+                'to': to_address,
                 'value': amount_in_wei,
                 'gas': 21000,
                 'gasPrice': int(w3.eth.gas_price * 1.1),
                 'nonce': nonce,
-                'chainId': 1  # Mainnet chain ID
+                'chainId': 15107  # Mainnet chain ID
             }
 
             # Sign the transaction
             signed_txn = w3.eth.account.sign_transaction(transaction, private_key=private_key)
 
             # Send the transaction
-            tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
             # Wait for the transaction receipt
             tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
@@ -100,6 +102,7 @@ class WalletManager:
             else:
                 return "Transaction failed"
         except Exception as e:
+            print(f"An error occurred: {e}")
             return f"An error occurred: {e}"
 
     def wallet_address_in_post(self, posts, teleport_users_string, private_key, eth_mainnet_rpc_url: str,llm_api_key: str):
@@ -192,18 +195,21 @@ class WalletManager:
                     config.eth_mainnet_rpc_url,
                     config.llm_api_key
                 )
+                print(wallet_data)
                 wallets = json.loads(wallet_data)
-
+                print(wallets)
                 if not wallets:
                     print("No wallet addresses or amounts to send ETH to.")
                     break
                 for wallet in wallets:
-                    self.transfer_eth(
+                    print(f"Sent {wallet['amount']} ETH to {wallet['address']}")
+                    tx = self.transfer_eth(
                         config.private_key_hex,
                         config.eth_mainnet_rpc_url,
                         wallet["address"],
                         wallet["amount"]
                     )
+                    print(f"Sent {wallet['amount']} ETH to {wallet['address']}")
                 break
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"Error processing wallet data: {e}")

@@ -93,6 +93,7 @@ class PipelineRunner:
                 )
 
             # Poll for events
+            print(f"Checking for teleport events at: {datetime.now().strftime('%H:%M:%S')}")
             lastBlock = self.teleport_manager.query_events(self.config.db, self.config.account, lastBlock, os.getenv("AGENT_WALLET_ADDRESS"))
             time.sleep(5)
 
@@ -103,6 +104,7 @@ class PipelineRunner:
         print("\nPerforming initial pipeline run...")
         try:
             self.pipeline.run()
+            self.teleport_manager.query_events(self.config.db, self.config.account, self.teleport_manager.get_last_block(), os.getenv("AGENT_WALLET_ADDRESS"))
             print("Initial run completed successfully.")
         except Exception as e:
             print(f"Error during initial run: {e}")

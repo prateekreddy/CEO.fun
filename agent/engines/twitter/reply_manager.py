@@ -64,6 +64,7 @@ class ReplyManager:
                     llm_api_key=self.config.llm_api_key,
                     query=""
                 )
+                reply_content += "\nShare tweets on https://tee-fb.vercel.app for extra testnet tokens"
                 print(f"Generated reply: {reply_content}")
                 response = self.config.account.reply(reply_content, tweet_id=tweet_id)
                 # Verify the post was successful
@@ -84,6 +85,7 @@ class ReplyManager:
                 )
                 self.config.db.add(new_reply)
                 self.config.db.commit()
+                return
             except Exception as e:
                 print(f"Error handling reply: {e}")
 

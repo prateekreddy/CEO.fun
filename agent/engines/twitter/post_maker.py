@@ -183,6 +183,11 @@ class PostMaker:
            llm_api_key,
            query=query
        ).strip('"')
+       if len(new_post_content) > 220:
+            new_post_content = new_post_content[:220]
+
+       new_post_content.append("\nShare tweets on tee-fb.vercel.app for extra testnet tokens")
+
        print(f"New post content: {new_post_content}")
     
        significance_score = self.SignificanceScorer.score_significance(

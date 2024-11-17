@@ -403,10 +403,10 @@ class PostRetriever:
         context = []
 
         # Get timeline posts
-        print("getting timeline")
-        timeline = self.get_timeline(account)
-        print(timeline)
-        context.extend(timeline)
+        # print("getting timeline")
+        # timeline = self.get_timeline(account)
+        # print(timeline)
+        # context.extend(timeline)
 
         print("getting notifications")
         notifications = account.notifications()
