@@ -15,6 +15,14 @@ from models import User
 from engines.wallet.find_teleport import TeleportManager
 
 class WalletManager:
+
+    rpc_dict = {
+        "sepolia": "wss://ethereum-sepolia-rpc.publicnode.com",
+        "polygon-amoy": "https://polygon-amoy.drpc.org",
+        "arb-sepolia": "https://endpoints.omniatech.io/v1/arbitrum/sepolia/public",
+        "gnosis-chiado": "https://gnosis-chiado-rpc.publicnode.com"
+    }
+
     def __init__(self):
         pass
 
