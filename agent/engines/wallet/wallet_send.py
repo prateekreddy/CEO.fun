@@ -20,7 +20,9 @@ class WalletManager:
         "sepolia": "wss://ethereum-sepolia-rpc.publicnode.com",
         "polygon-amoy": "https://polygon-amoy.drpc.org",
         "arb-sepolia": "https://endpoints.omniatech.io/v1/arbitrum/sepolia/public",
-        "gnosis-chiado": "https://gnosis-chiado-rpc.publicnode.com"
+        "gnosis-chiado": "https://gnosis-chiado-rpc.publicnode.com",
+        "unichain-sepolia": "https://sepolia.unichain.org",
+        "base-sepolia": "https://sepolia.base.org"
     }
 
     def __init__(self):
